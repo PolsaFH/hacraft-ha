@@ -1,12 +1,12 @@
 {
   "domain": "hacraft",
   "name": "HACraft",
-  "codeowners": ["@filiphjelmeland"],
+  "codeowners": ["@PolsaFH"],
   "config_flow": true,
   "dependencies": ["websocket_api"],
-  "documentation": "https://github.com/filiphjelmeland/hacraft-ha",
+  "documentation": "https://github.com/PolsaFH/hacraft-ha",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/filiphjelmeland/hacraft-ha/issues",
+  "issue_tracker": "https://github.com/PolsaFH/hacraft-ha/issues",
   "requirements": [],
   "single_config_entry": true,
   "version": "0.3.0"

@@ -1,6 +1,6 @@
 # HACraft (Home Assistant integration)
 
-A custom_component that lets the [HACraft Minecraft mod](https://github.com/filiphjelmeland/hacraft-mod)
+A custom_component that lets the [HACraft Minecraft mod](https://github.com/PolsaFH/hacraft-mod)
 connect to your Home Assistant instance and control the entities you choose
 to expose to it - see the mod's README for the in-game setup flow.
 
