@@ -1,6 +1,6 @@
-# Redstone Assistant (Home Assistant integration)
+# HACraft (Home Assistant integration)
 
-A custom_component that lets the [Redstone Assistant Minecraft mod](https://github.com/filiphjelmeland/redstone-assistant-mod)
+A custom_component that lets the [HACraft Minecraft mod](https://github.com/filiphjelmeland/hacraft-mod)
 connect to your Home Assistant instance and control the entities you choose
 to expose to it - see the mod's README for the in-game setup flow.
 
@@ -12,22 +12,22 @@ instance.** See "What's verified" below.
 ## Installation
 
 Via [HACS](https://hacs.xyz/): add this repository as a custom repository
-(Integrations), then install "Redstone Assistant" and restart Home
-Assistant. Manually: copy `custom_components/redstone_assistant` into your
+(Integrations), then install "HACraft" and restart Home
+Assistant. Manually: copy `custom_components/hacraft` into your
 Home Assistant `custom_components` folder and restart.
 
-Then: Settings -> Devices & Services -> Add Integration -> "Redstone
-Assistant" (there's nothing to fill in - it's a single confirmation step,
+Then: Settings -> Devices & Services -> Add Integration -> "HACraft"
+(there's nothing to fill in - it's a single confirmation step,
 see `config_flow.py`'s docstring for why). Finally, expose the entities you
 want Minecraft to see: Settings -> Voice Assistants -> Expose -> (assistant
-dropdown) -> Redstone Assistant, same screen used by Assist/Google/Alexa.
+dropdown) -> HACraft, same screen used by Assist/Google/Alexa.
 
 ## What this integration does
 
 Registers three commands on Home Assistant's own `/api/websocket`
 connection (not a second socket - see `docs/PROTOCOL.md`):
-`redstone_assistant/list_entities`, `redstone_assistant/subscribe_entities`,
-`redstone_assistant/call_service`. The mod authenticates to that same
+`hacraft/list_entities`, `hacraft/subscribe_entities`,
+`hacraft/call_service`. The mod authenticates to that same
 `/api/websocket` endpoint with a normal long-lived access token, exactly
 like any other Home Assistant client, then issues these on top.
 

@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up HACraft",
+        "description": "This turns on the websocket commands your HACraft Minecraft mod connects to. There's nothing to fill in here - inside Minecraft, generate a long-lived access token from your Home Assistant profile (Settings > your profile > Security) and enter this instance's URL and the token in the mod's Home Server block."
+      }
+    },
+    "abort": {
+      "already_configured": "HACraft is already set up."
+    }
+  }
+}

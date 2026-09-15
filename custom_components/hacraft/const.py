@@ -1,6 +1,6 @@
-"""Constants for the Redstone Assistant integration."""
+"""Constants for the HACraft integration."""
 
-DOMAIN = "redstone_assistant"
+DOMAIN = "hacraft"
 
 CMD_LIST_ENTITIES = f"{DOMAIN}/list_entities"
 CMD_SUBSCRIBE_ENTITIES = f"{DOMAIN}/subscribe_entities"

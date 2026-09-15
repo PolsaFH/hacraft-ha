@@ -1,8 +1,8 @@
-# Redstone Assistant wire protocol
+# HACraft wire protocol
 
 This is the source of truth for the commands exchanged between the mod
 (`HaConnection`, in this repo) and the Home Assistant custom_component
-(`redstone_assistant/websocket_api.py`, in `redstone-assistant-ha`). If you
+(`hacraft/websocket_api.py`, in `hacraft-ha`). If you
 change one side, update this file and the other repo's copy in the same PR -
 a mismatched pair should fail loudly, not silently misbehave.
 
@@ -17,7 +17,7 @@ envelope - because we're commands *on* that connection, not a separate
 protocol layered under it. Concretely: the mod authenticates to
 `/api/websocket` with a player's long-lived access token exactly like any
 other HA client (`auth_required` -> `auth` -> `auth_ok`), then sends our
-`redstone_assistant/*` command types on top.
+`hacraft/*` command types on top.
 
 ## Handshake
 
@@ -35,14 +35,14 @@ Standard HA auth, nothing custom:
 (or `{"type": "auth_invalid", "message": "..."}`, which the mod surfaces
 verbatim in the Home Server block's GUI as a connect error.)
 
-## `redstone_assistant/list_entities`
+## `hacraft/list_entities`
 
 Request:
 ```json
-{"id": 2, "type": "redstone_assistant/list_entities"}
+{"id": 2, "type": "hacraft/list_entities"}
 ```
 
-Result - only entities exposed to the `redstone_assistant` "assistant" via
+Result - only entities exposed to the `hacraft` "assistant" via
 Home Assistant's existing Settings -> Voice Assistants -> Expose screen
 (see `exposed_entities.py` in the HA repo):
 
@@ -55,11 +55,11 @@ Home Assistant's existing Settings -> Voice Assistants -> Expose screen
 ]}}
 ```
 
-## `redstone_assistant/subscribe_entities`
+## `hacraft/subscribe_entities`
 
 Request:
 ```json
-{"id": 3, "type": "redstone_assistant/subscribe_entities", "entity_ids": ["light.kitchen"]}
+{"id": 3, "type": "hacraft/subscribe_entities", "entity_ids": ["light.kitchen"]}
 ```
 
 Ack:
@@ -78,16 +78,16 @@ Re-sending `subscribe_entities` with a new `entity_ids` list replaces the
 previous subscription for that connection (the mod does this every time a
 block is bound/unbound, sending the full current set rather than diffing).
 
-## `redstone_assistant/call_service`
+## `hacraft/call_service`
 
 Generic across domains - adding climate/cover controls costs nothing here:
 
 ```json
-{"id": 4, "type": "redstone_assistant/call_service",
+{"id": 4, "type": "hacraft/call_service",
  "domain": "light", "service": "toggle", "entity_id": "light.kitchen"}
 ```
 ```json
-{"id": 5, "type": "redstone_assistant/call_service",
+{"id": 5, "type": "hacraft/call_service",
  "domain": "climate", "service": "set_temperature",
  "entity_id": "climate.living_room", "data": {"temperature": 21}}
 ```
@@ -103,7 +103,7 @@ Any command can fail with HA's normal result-error shape:
 
 ```json
 {"id": 4, "type": "result", "success": false,
- "error": {"code": "entity_not_exposed", "message": "light.kitchen is not exposed to Redstone Assistant"}}
+ "error": {"code": "entity_not_exposed", "message": "light.kitchen is not exposed to HACraft"}}
 ```
 
 Known `code`s the integration should use consistently: `entity_not_exposed`,
@@ -113,7 +113,7 @@ Known `code`s the integration should use consistently: `entity_not_exposed`,
 
 There's no separate `protocol_version` handshake message - compatibility
 rides on Home Assistant's own `manifest.json` version pin on the
-`redstone_assistant` integration and the mod's own `mod_version`. If a
+`hacraft` integration and the mod's own `mod_version`. If a
 breaking change to any command shape above is needed, bump both repos'
 minor version together and note it in both changelogs; this file's git
 history is the changelog for the wire format itself.

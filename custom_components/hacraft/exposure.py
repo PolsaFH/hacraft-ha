@@ -3,7 +3,7 @@
 Reuses the same per-entity "expose to X" list that already backs Assist and
 the Google Assistant / Alexa cloud integrations
 (``homeassistant.components.homeassistant.exposed_entities``), registering
-``redstone_assistant`` as another consumer of it instead of building a
+``hacraft`` as another consumer of it instead of building a
 second entity picker UI. A user manages "what Minecraft can see" from the
 same Settings -> Voice Assistants -> Expose screen they may already know.
 
@@ -32,14 +32,14 @@ except ImportError:  # pragma: no cover - defensive, see module docstring
     _EXPOSURE_AVAILABLE = False
     _LOGGER.warning(
         "Could not import homeassistant.components.homeassistant."
-        "exposed_entities.async_should_expose - Redstone Assistant will "
+        "exposed_entities.async_should_expose - HACraft will "
         "treat every entity as NOT exposed (fail closed) until this is "
-        "fixed. See the redstone-assistant-ha README for details."
+        "fixed. See the hacraft-ha README for details."
     )
 
 
 def async_should_expose(hass: HomeAssistant, entity_id: str) -> bool:
-    """Whether entity_id has been exposed to the redstone_assistant "assistant".
+    """Whether entity_id has been exposed to the hacraft "assistant".
 
     Fails closed: if the underlying Home Assistant API isn't available or
     raises, nothing is reported as exposed rather than everything.

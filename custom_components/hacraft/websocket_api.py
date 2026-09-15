@@ -1,9 +1,9 @@
-"""Redstone Assistant's commands on Home Assistant's own websocket API.
+"""HACraft's commands on Home Assistant's own websocket API.
 
 Registered on HA's existing, already-authenticated `/api/websocket`
 connection (`websocket_api.async_register_command`) rather than a second
 raw socket, so we get HA's auth/TLS/session handling for free - see
-docs/PROTOCOL.md (and the matching copy in redstone-assistant-mod) for the
+docs/PROTOCOL.md (and the matching copy in hacraft-mod) for the
 full wire format and the reasoning.
 """
 from __future__ import annotations
@@ -40,7 +40,7 @@ def _serialize_state(state: State) -> dict:
 )
 @websocket_api.async_response
 async def handle_list_entities(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict) -> None:
-    """List every entity exposed to Redstone Assistant."""
+    """List every entity exposed to HACraft."""
     entities = [
         _serialize_state(state)
         for state in hass.states.async_all()
@@ -99,7 +99,7 @@ async def handle_call_service(hass: HomeAssistant, connection: websocket_api.Act
     entity_id = msg["entity_id"]
     if not async_should_expose(hass, entity_id):
         connection.send_error(
-            msg["id"], ERR_ENTITY_NOT_EXPOSED, f"{entity_id} is not exposed to Redstone Assistant"
+            msg["id"], ERR_ENTITY_NOT_EXPOSED, f"{entity_id} is not exposed to HACraft"
         )
         return
 
@@ -117,7 +117,7 @@ async def handle_call_service(hass: HomeAssistant, connection: websocket_api.Act
 
 
 def async_register_commands(hass: HomeAssistant) -> None:
-    """Register every redstone_assistant/* websocket command."""
+    """Register every hacraft/* websocket command."""
     websocket_api.async_register_command(hass, handle_list_entities)
     websocket_api.async_register_command(hass, handle_subscribe_entities)
     websocket_api.async_register_command(hass, handle_call_service)
