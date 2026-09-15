@@ -20,7 +20,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
-from .const import DOMAIN, OPT_EXPOSED_ENTITIES
+from .const import DOMAIN, DOMAIN_LABELS, KNOWN_DOMAINS, OPT_EXPOSE_ALL_DOMAINS, OPT_EXPOSED_ENTITIES
 
 
 class HACraftConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -57,11 +57,32 @@ class HACraftOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        current = self.config_entry.options.get(OPT_EXPOSED_ENTITIES, [])
+        current_entities = self.config_entry.options.get(OPT_EXPOSED_ENTITIES, [])
+        current_all_domains = self.config_entry.options.get(OPT_EXPOSE_ALL_DOMAINS, [])
         schema = vol.Schema(
             {
-                vol.Optional(OPT_EXPOSED_ENTITIES, default=current): selector.EntitySelector(
-                    selector.EntitySelectorConfig(multiple=True)
+                # Bulk option first: "expose all lights" etc, so a user with
+                # many lights doesn't have to hand-pick every single one (and
+                # future lights are covered automatically too, no need to
+                # come back here). See exposure.py for how the two options
+                # combine.
+                vol.Optional(OPT_EXPOSE_ALL_DOMAINS, default=current_all_domains): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            selector.SelectOptionDict(value=domain, label=DOMAIN_LABELS[domain])
+                            for domain in sorted(KNOWN_DOMAINS)
+                        ],
+                        multiple=True,
+                        mode=selector.SelectSelectorMode.LIST,
+                    )
+                ),
+                # Individual picker for anything not covered by a blanket
+                # "expose all" above - e.g. just one of several switches.
+                # Filtered to the domains the mod actually understands
+                # (KNOWN_DOMAINS) so this isn't cluttered with every sensor/
+                # binary_sensor/etc in the house.
+                vol.Optional(OPT_EXPOSED_ENTITIES, default=current_entities): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=sorted(KNOWN_DOMAINS), multiple=True)
                 ),
             }
         )

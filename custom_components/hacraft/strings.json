@@ -14,9 +14,10 @@
     "step": {
       "init": {
         "title": "Choose what Minecraft can see",
-        "description": "Pick the entities the HACraft Minecraft mod is allowed to list, watch, and control. Anything not picked here is invisible to the mod, even if a player types its entity_id in-game.",
+        "description": "Anything not covered here is invisible to the mod, even if a player types its exact entity_id in-game. Tick a domain below to expose every entity of that kind (including ones you add later), or pick individual entities for finer control.",
         "data": {
-          "exposed_entities": "Exposed entities"
+          "expose_all_domains": "Expose all of these domains",
+          "exposed_entities": "Or expose individual entities"
         }
       }
     }
