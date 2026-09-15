@@ -1,0 +1,13 @@
+{
+  "domain": "redstone_assistant",
+  "name": "Redstone Assistant",
+  "codeowners": ["@filiphjelmeland"],
+  "config_flow": true,
+  "dependencies": ["websocket_api"],
+  "documentation": "https://github.com/filiphjelmeland/redstone-assistant-ha",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/filiphjelmeland/redstone-assistant-ha/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "0.1.0"
+}
