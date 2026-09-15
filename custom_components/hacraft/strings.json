@@ -9,5 +9,16 @@
     "abort": {
       "already_configured": "HACraft is already set up."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Choose what Minecraft can see",
+        "description": "Pick the entities the HACraft Minecraft mod is allowed to list, watch, and control. Anything not picked here is invisible to the mod, even if a player types its entity_id in-game.",
+        "data": {
+          "exposed_entities": "Exposed entities"
+        }
+      }
+    }
   }
 }

@@ -9,6 +9,10 @@ CMD_CALL_SERVICE = f"{DOMAIN}/call_service"
 ERR_ENTITY_NOT_EXPOSED = "entity_not_exposed"
 ERR_SERVICE_CALL_FAILED = "service_call_failed"
 
+# Config entry options key holding the list of entity_ids the user picked in
+# HACraftOptionsFlow (config_flow.py) - see exposure.py for how it's used.
+OPT_EXPOSED_ENTITIES = "exposed_entities"
+
 # Domains the current mod release actually understands. list_entities still
 # reports every exposed entity regardless of domain (a future mod version
 # might understand more without a Home Assistant-side change), but this is

@@ -6,8 +6,10 @@ to expose to it - see the mod's README for the in-game setup flow.
 
 ## Status
 
-Phase 1 - freshly scaffolded, **not yet run against a real Home Assistant
-instance.** See "What's verified" below.
+Phase 1 - confirmed working against a real Home Assistant instance and a
+real running Minecraft mod build: the config flow, websocket auth, and
+`hacraft/*` commands all work end to end. The entity-exposure mechanism was
+corrected after real-world testing - see "What's verified" below.
 
 ## Installation
 
@@ -18,9 +20,12 @@ Home Assistant `custom_components` folder and restart.
 
 Then: Settings -> Devices & Services -> Add Integration -> "HACraft"
 (there's nothing to fill in - it's a single confirmation step,
-see `config_flow.py`'s docstring for why). Finally, expose the entities you
-want Minecraft to see: Settings -> Voice Assistants -> Expose -> (assistant
-dropdown) -> HACraft, same screen used by Assist/Google/Alexa.
+see `config_flow.py`'s docstring for why). Finally, pick the entities you
+want Minecraft to see: find the HACraft integration card on that same
+Settings -> Devices & Services page and click **Configure** - that opens
+HACraft's own entity picker (not the Voice Assistants -> Expose screen,
+see "What's verified" below for why). Anything not picked there is
+invisible to the mod, even if a player types its exact entity_id in-game.
 
 ## What this integration does
 
@@ -31,33 +36,35 @@ connection (not a second socket - see `docs/PROTOCOL.md`):
 `/api/websocket` endpoint with a normal long-lived access token, exactly
 like any other Home Assistant client, then issues these on top.
 
-Entity visibility reuses Home Assistant's existing per-entity exposure list
-(the same one behind Assist/Google/Alexa) rather than a second picker UI -
-see `exposure.py`.
+Entity visibility is HACraft's own list, picked via its Options flow (the
+"Configure" button on its integration card) and stored on the config
+entry - see `exposure.py` and `config_flow.py`.
 
 ## What's verified vs. not
 
-This was written and reviewed carefully against documented Home Assistant
-integration conventions, but **could not be run against a live Home
-Assistant instance or even have `homeassistant` importable** in the
-environment it was built in (installing the `homeassistant` PyPI package
-timed out - it's a large package with a lot of transitive dependencies).
-Concretely:
-
-- Verified: every `.py` file passes `python3 -m py_compile` (syntax is
-  valid Python).
-- **Not verified**: the exact import path
-  `homeassistant.components.homeassistant.exposed_entities.async_should_expose`
-  in `exposure.py`, the `websocket_api.ActiveConnection`/
-  `connection.subscriptions` pattern in `websocket_api.py`, and the
-  `Event[EventStateChangedData]` typed-event annotation all reflect
-  documented/observed Home Assistant core conventions as of when this was
-  written, but none of them were checked against an actual installed
-  `homeassistant` package. If setup fails on your HA version, `exposure.py`
-  and `websocket_api.py` are the two most likely places - both fail
-  defensively (entities report as not-exposed rather than crashing) if the
-  exposure import is wrong, but a signature mismatch in the websocket
-  command decorators would surface as a setup error worth reading closely.
+- **Verified against a real Home Assistant instance**: the config flow
+  (single confirmation step), the integration loading successfully, and
+  the mod connecting over `/api/websocket` with a long-lived access token
+  and getting `auth_ok`.
+- **Corrected after real-world testing**: the original design reused Home
+  Assistant's built-in Settings -> Voice Assistants -> Expose screen (the
+  one behind Assist/Google Assistant/Alexa) for entity visibility, on the
+  assumption that a third-party integration could register itself there as
+  another "assistant" tab. That assumption was wrong - that screen's tabs
+  are hardcoded in Home Assistant's own frontend to
+  `conversation`/`cloud.alexa`/`cloud.google_assistant`; "HACraft" never
+  appeared as an option no matter how the integration was installed or set
+  up. Fixed by giving HACraft its own Options flow entity picker instead
+  (`config_flow.py`'s `HACraftOptionsFlow`, backed by
+  `homeassistant.helpers.selector.EntitySelector` - a long-stable, widely
+  used HA API, unlike the internal `exposed_entities` module this replaces).
+- **Not yet verified**: the `websocket_api.ActiveConnection`/
+  `connection.subscriptions` subscription-cleanup pattern in
+  `websocket_api.py`, and the `Event[EventStateChangedData]` typed-event
+  annotation, haven't specifically been exercised by a long-running
+  `subscribe_entities` session yet (list_entities and call_service have).
+  If live state updates don't reach the mod, `websocket_api.py` is the
+  first place to check.
 
 ## License
 
