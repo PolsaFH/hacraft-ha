@@ -97,6 +97,43 @@ Result:
 {"id": 4, "type": "result", "success": true, "result": null}
 ```
 
+## `hacraft/camera_frame`
+
+One JPEG snapshot from an in-game Home Camera block. Unlike every other
+command here, this one is also implicitly a registration: the first time a
+given `camera_id` is seen (per Home Assistant run), the integration creates
+a `camera.hacraft_<camera_id>` entity for it; every call after that just
+replaces the stored frame and notifies that entity to refresh. There's
+deliberately no separate `register_camera` command - one command with no
+ordering to get right beats two with a "did I register yet" state machine
+on the mod side.
+
+`camera_id` must be 1-32 lowercase letters/digits/underscores (sanitized
+client-side in the block's settings screen before it's ever sent).
+`friendly_name` is free text, shown as `HACraft <friendly_name>` in Home
+Assistant. `image_base64` is a base64-encoded JPEG - kept as raw bytes over
+the Minecraft-side network packet and only base64-encoded right before this
+call, since that's the one hop that actually needs a JSON-safe encoding.
+
+```json
+{"id": 6, "type": "hacraft/camera_frame",
+ "camera_id": "front_door", "friendly_name": "Front Door",
+ "image_base64": "/9j/4AAQSkZJRgABAQAAAQABAAD..."}
+```
+
+Result echoes back the entity_id it resolved to, purely so the mod's
+settings screen can show the player where to find it in Home Assistant:
+
+```json
+{"id": 6, "type": "result", "success": true, "result": {"entity_id": "camera.hacraft_front_door"}}
+```
+
+The mod re-sends this on its own schedule (the interval is set on the
+camera block's settings screen, a few seconds by default) for as long as
+that camera is enabled and its owner is online - there's no separate
+subscribe/unsubscribe step like `hacraft/subscribe_entities` uses, since the
+mod is the one deciding when a new frame exists, not Home Assistant.
+
 ## Errors
 
 Any command can fail with HA's normal result-error shape:
@@ -107,7 +144,7 @@ Any command can fail with HA's normal result-error shape:
 ```
 
 Known `code`s the integration should use consistently: `entity_not_exposed`,
-`entity_not_found`, `invalid_domain`, `service_call_failed`.
+`entity_not_found`, `invalid_domain`, `service_call_failed`, `invalid_camera_id`.
 
 ## Compatibility
 
