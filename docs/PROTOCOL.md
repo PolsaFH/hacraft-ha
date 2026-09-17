@@ -134,6 +134,31 @@ that camera is enabled and its owner is online - there's no separate
 subscribe/unsubscribe step like `hacraft/subscribe_entities` uses, since the
 mod is the one deciding when a new frame exists, not Home Assistant.
 
+## `hacraft/camera_removed`
+
+Fire-and-forget notice, sent server-side the moment a Home Camera block is
+actually broken in-game (not on chunk unload, and not when a piston shoves
+it elsewhere - both leave the block/entity intact). Lets Home Assistant
+drop the `camera.hacraft_<camera_id>` entity immediately instead of it
+sitting around forever reporting "unavailable" - four test cameras did
+exactly that before this command existed, and had to be cleaned up by hand
+via the entity registry.
+
+```json
+{"id": 7, "type": "hacraft/camera_removed", "camera_id": "front_door"}
+```
+
+Result:
+```json
+{"id": 7, "type": "result", "success": true, "result": null}
+```
+
+Idempotent - removing an already-gone `camera_id` (e.g. the owner was
+offline when the block broke, or it was already cleaned up) is a no-op,
+not an error. The integration also forgets the camera_id internally, so a
+future block that happens to generate the same id again registers as a
+brand new entity rather than being silently swallowed as "already known".
+
 ## Errors
 
 Any command can fail with HA's normal result-error shape:

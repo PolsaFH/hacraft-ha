@@ -18,6 +18,13 @@ ERR_INVALID_CAMERA_ID = "invalid_camera_id"
 # no ordering to get right) mattered more than protocol purity here.
 CMD_CAMERA_FRAME = f"{DOMAIN}/camera_frame"
 
+# hacraft/camera_removed - fire-and-forget, sent server-side the moment a
+# Home Camera block is actually broken in-game (see HaCameraBlock#onRemove
+# in hacraft-mod). Lets us drop the camera.hacraft_<camera_id> entity right
+# away instead of it lingering forever as an "unavailable" orphan - see
+# docs/PROTOCOL.md.
+CMD_CAMERA_REMOVED = f"{DOMAIN}/camera_removed"
+
 # Dispatcher signal fired once, the first time a camera_id is ever seen this
 # HA run, so camera.py can add the entity - see websocket_api.py.
 SIGNAL_CAMERA_REGISTERED = f"{DOMAIN}_camera_registered"

@@ -17,12 +17,15 @@ import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, State, callback
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_track_state_change_event
+from homeassistant.util import slugify
 
 from .const import (
     CMD_CALL_SERVICE,
     CMD_CAMERA_FRAME,
+    CMD_CAMERA_REMOVED,
     CMD_LIST_ENTITIES,
     CMD_SUBSCRIBE_ENTITIES,
     DOMAIN,
@@ -176,9 +179,41 @@ async def handle_camera_frame(hass: HomeAssistant, connection: websocket_api.Act
     connection.send_result(msg["id"], {"entity_id": f"camera.{DOMAIN}_{camera_id}"})
 
 
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): CMD_CAMERA_REMOVED,
+        vol.Required("camera_id"): str,
+    }
+)
+@websocket_api.async_response
+async def handle_camera_removed(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict) -> None:
+    """Drop a camera's entity the moment its block is broken in-game.
+
+    Idempotent - a camera_id that's already gone (never registered, or
+    already cleaned up) is a no-op, not an error, since the mod fires this
+    unconditionally on block break with no way to know HA's side of things.
+    Forgets the camera_id from our own bookkeeping too, not just the
+    registry, so a future block that happens to land on the same id starts
+    fresh instead of being swallowed by known_camera_ids as "already added".
+    """
+    camera_id = msg["camera_id"]
+    entity_id = f"camera.{DOMAIN}_{slugify(camera_id)}"
+
+    registry = er.async_get(hass)
+    if registry.async_get(entity_id) is not None:
+        registry.async_remove(entity_id)
+
+    domain_data = hass.data.setdefault(DOMAIN, {})
+    domain_data.get("camera_frames", {}).pop(camera_id, None)
+    domain_data.get("known_camera_ids", set()).discard(camera_id)
+
+    connection.send_result(msg["id"])
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
     """Register every hacraft/* websocket command."""
     websocket_api.async_register_command(hass, handle_list_entities)
     websocket_api.async_register_command(hass, handle_subscribe_entities)
     websocket_api.async_register_command(hass, handle_call_service)
     websocket_api.async_register_command(hass, handle_camera_frame)
+    websocket_api.async_register_command(hass, handle_camera_removed)
