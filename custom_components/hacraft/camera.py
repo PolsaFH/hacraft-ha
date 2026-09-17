@@ -16,6 +16,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util import slugify
 
 from .const import DOMAIN, SIGNAL_CAMERA_FRAME_PREFIX, SIGNAL_CAMERA_REGISTERED
 
@@ -72,7 +73,18 @@ class HACraftCamera(Camera):
         self._camera_id = camera_id
         self._attr_unique_id = f"{entry_id}_camera_{camera_id}"
         self._attr_name = f"HACraft {friendly_name}"
-        self._attr_suggested_object_id = f"{DOMAIN}_{camera_id}"
+        # _attr_suggested_object_id turned out NOT to be enough on its own -
+        # in practice this platform's entities still ended up named from
+        # _attr_name ("HACraft Camera" for every camera whose friendly name
+        # was left at the default "Camera"), so every camera placed in-game
+        # collided on the same slug and Home Assistant appended _2/_3/_4
+        # rather than using each camera's own id - four cameras all placed
+        # for testing this session ended up as camera.hacraft_camera,
+        # _camera_2, _camera_3, _camera_4, none of them named after their
+        # actual camera_id. Setting entity_id directly is unambiguous and
+        # matches docs/PROTOCOL.md's documented camera.hacraft_<camera_id>
+        # shape regardless of what friendly_name the player chose.
+        self.entity_id = f"camera.{DOMAIN}_{slugify(camera_id)}"
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
