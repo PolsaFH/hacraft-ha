@@ -51,10 +51,11 @@ OPT_EXPOSE_ALL_DOMAINS = "expose_all_domains"
 # unusable, exactly like the mod's own DomainCapability enum - keep the two
 # in sync, see docs/PROTOCOL.md. Also used to build the "expose all X"
 # per-domain toggle list and to restrict the individual entity picker so it
-# isn't cluttered with binary_sensor/etc HACraft can't use yet. sensor is
-# read-only in the mod (shown as plain state text, e.g. a temperature
-# sensor) - no service calls are ever made against it.
-KNOWN_DOMAINS = {"light", "switch", "climate", "cover", "sensor"}
+# isn't cluttered with every unsupported domain in the house. sensor and
+# binary_sensor are read-only in the mod (shown as plain state text, or fed
+# into a redstone-output block for binary_sensor) - no service calls are
+# ever made against either.
+KNOWN_DOMAINS = {"light", "switch", "climate", "cover", "sensor", "binary_sensor"}
 
 # Human-readable labels for KNOWN_DOMAINS, used by the "expose all" selector
 # in HACraftOptionsFlow.
@@ -64,4 +65,5 @@ DOMAIN_LABELS = {
     "climate": "All climate devices",
     "cover": "All covers",
     "sensor": "All sensors",
+    "binary_sensor": "All binary sensors",
 }
