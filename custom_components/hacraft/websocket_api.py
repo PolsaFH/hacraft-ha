@@ -11,6 +11,7 @@ from __future__ import annotations
 import base64
 import logging
 import re
+from datetime import timedelta
 
 import voluptuous as vol
 
@@ -20,22 +21,26 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_track_state_change_event
+from homeassistant.util import dt as dt_util
 from homeassistant.util import slugify
 
 from .const import (
     CMD_CALL_SERVICE,
     CMD_CAMERA_FRAME,
     CMD_CAMERA_REMOVED,
+    CMD_GET_HISTORY,
     CMD_LIST_ENTITIES,
     CMD_SUBSCRIBE_ENTITIES,
     DOMAIN,
     ERR_ENTITY_NOT_EXPOSED,
+    ERR_HISTORY_UNAVAILABLE,
     ERR_INVALID_CAMERA_ID,
     ERR_SERVICE_CALL_FAILED,
     SIGNAL_CAMERA_FRAME_PREFIX,
     SIGNAL_CAMERA_REGISTERED,
 )
 from .exposure import async_should_expose
+from .history import downsample, state_to_number
 
 _CAMERA_ID_RE = re.compile(r"^[a-z0-9_]{1,32}$")
 
@@ -210,10 +215,69 @@ async def handle_camera_removed(hass: HomeAssistant, connection: websocket_api.A
     connection.send_result(msg["id"])
 
 
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): CMD_GET_HISTORY,
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("hours"): vol.All(vol.Coerce(float), vol.Range(min=0.05, max=168)),
+        vol.Required("points"): vol.All(vol.Coerce(int), vol.Range(min=2, max=500)),
+    }
+)
+@websocket_api.async_response
+async def handle_get_history(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict) -> None:
+    """Recorded history of one exposed entity, as ``points`` evenly spaced values (null where unknown).
+
+    Used by the mod's Home Sensor Screen to fill its graph straight away. Needs Home Assistant's recorder.
+    """
+    entity_id = msg["entity_id"]
+    if not async_should_expose(hass, entity_id):
+        connection.send_error(msg["id"], ERR_ENTITY_NOT_EXPOSED, f"{entity_id} is not exposed to HACraft")
+        return
+    if "recorder" not in hass.config.components:
+        connection.send_error(msg["id"], ERR_HISTORY_UNAVAILABLE, "the recorder integration is not running")
+        return
+
+    # imported here so a Home Assistant without the recorder can still load the rest of HACraft
+    from homeassistant.components.recorder import get_instance, history
+
+    end = dt_util.utcnow()
+    start = end - timedelta(hours=msg["hours"])
+
+    def _fetch() -> dict:
+        return history.get_significant_states(
+            hass,
+            start,
+            end,
+            [entity_id],
+            include_start_time_state=True,
+            significant_changes_only=False,
+            minimal_response=False,
+            no_attributes=True,
+        )
+
+    try:
+        states = await get_instance(hass).async_add_executor_job(_fetch)
+    except Exception as err:  # noqa: BLE001 - surfaced to the mod, which then just fills the graph live
+        _LOGGER.debug("get_history failed for %s", entity_id, exc_info=True)
+        connection.send_error(msg["id"], ERR_HISTORY_UNAVAILABLE, str(err))
+        return
+
+    points: list[tuple[float, float]] = []
+    for state in states.get(entity_id, []):
+        value = state_to_number(getattr(state, "state", None))
+        if value is not None:
+            points.append((state.last_updated.timestamp(), value))
+    points.sort(key=lambda p: p[0])
+    connection.send_result(
+        msg["id"], {"values": downsample(points, start.timestamp(), end.timestamp(), msg["points"])}
+    )
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
     """Register every hacraft/* websocket command."""
     websocket_api.async_register_command(hass, handle_list_entities)
     websocket_api.async_register_command(hass, handle_subscribe_entities)
     websocket_api.async_register_command(hass, handle_call_service)
+    websocket_api.async_register_command(hass, handle_get_history)
     websocket_api.async_register_command(hass, handle_camera_frame)
     websocket_api.async_register_command(hass, handle_camera_removed)

@@ -5,10 +5,12 @@ DOMAIN = "hacraft"
 CMD_LIST_ENTITIES = f"{DOMAIN}/list_entities"
 CMD_SUBSCRIBE_ENTITIES = f"{DOMAIN}/subscribe_entities"
 CMD_CALL_SERVICE = f"{DOMAIN}/call_service"
+CMD_GET_HISTORY = f"{DOMAIN}/get_history"
 
 ERR_ENTITY_NOT_EXPOSED = "entity_not_exposed"
 ERR_SERVICE_CALL_FAILED = "service_call_failed"
 ERR_INVALID_CAMERA_ID = "invalid_camera_id"
+ERR_HISTORY_UNAVAILABLE = "history_unavailable"
 
 # hacraft/camera_frame - one JPEG snapshot from an in-game Home Camera block.
 # Registration is implicit: the first frame for a given camera_id creates
@@ -55,7 +57,24 @@ OPT_EXPOSE_ALL_DOMAINS = "expose_all_domains"
 # binary_sensor are read-only in the mod (shown as plain state text, or fed
 # into a redstone-output block for binary_sensor) - no service calls are
 # ever made against either.
-KNOWN_DOMAINS = {"light", "switch", "climate", "cover", "sensor", "binary_sensor", "vacuum", "input_boolean", "media_player"}
+KNOWN_DOMAINS = {
+    "light",
+    "switch",
+    "climate",
+    "cover",
+    "sensor",
+    "binary_sensor",
+    "vacuum",
+    "input_boolean",
+    "media_player",
+    # fired by the Home Action block with one no-argument service call
+    "script",
+    "scene",
+    "button",
+    "fan",
+    # shown on a Home Sensor Screen (the mod fetches the picture through the camera proxy)
+    "camera",
+}
 
 # Human-readable labels for KNOWN_DOMAINS, used by the "expose all" selector
 # in HACraftOptionsFlow.
@@ -69,4 +88,9 @@ DOMAIN_LABELS = {
     "vacuum": "All vacuums",
     "input_boolean": "All input booleans (helpers)",
     "media_player": "All media players",
+    "script": "All scripts",
+    "scene": "All scenes",
+    "button": "All buttons",
+    "fan": "All fans",
+    "camera": "All cameras",
 }

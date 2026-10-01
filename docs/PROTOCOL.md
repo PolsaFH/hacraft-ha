@@ -97,6 +97,31 @@ Result:
 {"id": 4, "type": "result", "success": true, "result": null}
 ```
 
+## `hacraft/get_history`
+
+Recorded history of one exposed entity, used by the mod's Home Sensor Screen to fill its graph straight
+away instead of starting empty. Needs Home Assistant's `recorder`.
+
+```json
+{"id": 12, "type": "hacraft/get_history", "entity_id": "sensor.living_room_temperature", "hours": 1.0, "points": 96}
+```
+
+`hours` is 0.05-168, `points` 2-500. The result holds `points` evenly spaced values over the last `hours`
+hours, oldest first:
+
+```json
+{"id": 12, "type": "result", "success": true, "result": {"values": [null, 21.4, 21.4, 21.5, 21.6]}}
+```
+
+* A value holds until the entity changes, so each slot is the state that was current at the end of its slice;
+  `null` means nothing was known yet at that time.
+* Numeric states are returned as they are, on/off-style states (`on`, `open`, `playing`, `home`, ... /
+  `off`, `closed`, `idle`, ...) as `1`/`0`, anything else is skipped.
+* Errors: `entity_not_exposed`, and `history_unavailable` when the recorder is not running or the query
+  fails. The mod then simply fills the graph live.
+
+Added in integration 0.5.0.
+
 ## `hacraft/camera_frame`
 
 One JPEG snapshot from an in-game Home Camera block. Unlike every other

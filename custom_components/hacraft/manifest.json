@@ -1,6 +1,9 @@
 {
   "domain": "hacraft",
   "name": "HACraft",
+  "after_dependencies": [
+    "recorder"
+  ],
   "codeowners": [
     "@PolsaFH"
   ],
@@ -13,5 +16,5 @@
   "issue_tracker": "https://github.com/PolsaFH/hacraft-ha/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "0.4.6"
+  "version": "0.5.0"
 }
