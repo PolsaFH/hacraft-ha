@@ -55,7 +55,7 @@ OPT_EXPOSE_ALL_DOMAINS = "expose_all_domains"
 # binary_sensor are read-only in the mod (shown as plain state text, or fed
 # into a redstone-output block for binary_sensor) - no service calls are
 # ever made against either.
-KNOWN_DOMAINS = {"light", "switch", "climate", "cover", "sensor", "binary_sensor", "vacuum"}
+KNOWN_DOMAINS = {"light", "switch", "climate", "cover", "sensor", "binary_sensor", "vacuum", "input_boolean", "media_player"}
 
 # Human-readable labels for KNOWN_DOMAINS, used by the "expose all" selector
 # in HACraftOptionsFlow.
@@ -67,4 +67,6 @@ DOMAIN_LABELS = {
     "sensor": "All sensors",
     "binary_sensor": "All binary sensors",
     "vacuum": "All vacuums",
+    "input_boolean": "All input booleans (helpers)",
+    "media_player": "All media players",
 }

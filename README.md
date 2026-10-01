@@ -27,6 +27,12 @@ HACraft's own entity picker (not the Voice Assistants -> Expose screen,
 see "What's verified" below for why). Anything not picked there is
 invisible to the mod, even if a player types its exact entity_id in-game.
 
+**After updating the integration**, open **Configure** again: domains added
+by a newer release (for example `media_player` in 0.4.6) are never ticked
+automatically, so the mod will list nothing for them until you do. Restart
+Home Assistant after updating the files, and make sure the integration is
+enabled (a disabled entry exposes nothing).
+
 ## What this integration does
 
 Registers three commands on Home Assistant's own `/api/websocket`
