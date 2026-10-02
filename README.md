@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 The Home Assistant half of **HACraft**: a custom integration that lets the
-[HACraft Minecraft mod](https://github.com/PolsaFH/ha-mc-mod) read and control the devices **you choose** to
+HACraft Minecraft mod read and control the devices **you choose** to
 share, from inside Minecraft - lights, thermostats, blinds, speakers, vacuums, sensors with live graphs, even
 camera pictures on an in-game TV.
 
@@ -88,6 +88,16 @@ Every command checks that the entity is exposed; the integration refuses everyth
 integration and Home Assistant versions, whether the recorder is running, and how many entities of each domain
 Minecraft can see. It holds counts only - no entity names, addresses or tokens - so it is safe to attach to a
 bug report.
+
+## Security
+
+What the mod can and cannot do with your token and your devices is described in [docs/SECURITY.md](docs/SECURITY.md).
+
+## Reporting a problem
+
+Open an issue at [github.com/PolsaFH/hacraft-ha/issues](https://github.com/PolsaFH/hacraft-ha/issues) (the shared issue
+tracker for the mod and the integration). Include the output of `/ha status`, your mod and
+integration versions and, for Home Assistant problems, the file from *Download diagnostics* on the HACraft card.
 
 ## Development
 
