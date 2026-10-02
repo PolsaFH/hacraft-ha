@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/images/icon.png" width="128" alt="HACraft logo"></p>
+
 # HACraft for Home Assistant
 
 [![Validate](https://github.com/PolsaFH/hacraft-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/PolsaFH/hacraft-ha/actions/workflows/validate.yml)
