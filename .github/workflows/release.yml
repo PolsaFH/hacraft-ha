@@ -22,6 +22,6 @@ jobs:
           fi
       - name: Run the tests
         run: python3 tests/test_history.py
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
