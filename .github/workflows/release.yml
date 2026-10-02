@@ -1,0 +1,27 @@
+name: Release
+
+# Push a tag like v0.5.0 to publish a GitHub release (HACS installs the latest release).
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the tag matches the manifest version
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('custom_components/hacraft/manifest.json'))['version'])")
+          if [ "v$version" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match manifest version $version"; exit 1
+          fi
+      - name: Run the tests
+        run: python3 tests/test_history.py
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

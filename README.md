@@ -1,79 +1,93 @@
-# HACraft (Home Assistant integration)
+# HACraft for Home Assistant
 
-A custom_component that lets the [HACraft Minecraft mod](https://github.com/PolsaFH/hacraft-mod)
-connect to your Home Assistant instance and control the entities you choose
-to expose to it - see the mod's README for the in-game setup flow.
+[![Validate](https://github.com/PolsaFH/hacraft-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/PolsaFH/hacraft-ha/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Status
+The Home Assistant half of **HACraft**: a custom integration that lets the
+[HACraft Minecraft mod](https://github.com/PolsaFH/ha-mc-mod) read and control the devices **you choose** to
+share, from inside Minecraft - lights, thermostats, blinds, speakers, vacuums, sensors with live graphs, even
+camera pictures on an in-game TV.
 
-Phase 1 - confirmed working against a real Home Assistant instance and a
-real running Minecraft mod build: the config flow, websocket auth, and
-`hacraft/*` commands all work end to end. The entity-exposure mechanism was
-corrected after real-world testing - see "What's verified" below.
+The integration is small on purpose: it adds a few commands to Home Assistant's own websocket API and keeps one
+list - what Minecraft is allowed to see. The mod connects with an ordinary long-lived access token, exactly like
+any other Home Assistant client.
 
 ## Installation
 
-Via [HACS](https://hacs.xyz/): add this repository as a custom repository
-(Integrations), then install "HACraft" and restart Home
-Assistant. Manually: copy `custom_components/hacraft` into your
-Home Assistant `custom_components` folder and restart.
+**HACS:** *HACS -> Integrations -> three dots -> Custom repositories*, add `https://github.com/PolsaFH/hacraft-ha`
+as an *Integration*, install **HACraft** and restart Home Assistant.
 
-Then: Settings -> Devices & Services -> Add Integration -> "HACraft"
-(there's nothing to fill in - it's a single confirmation step,
-see `config_flow.py`'s docstring for why). Finally, pick the entities you
-want Minecraft to see: find the HACraft integration card on that same
-Settings -> Devices & Services page and click **Configure** - that opens
-HACraft's own entity picker (not the Voice Assistants -> Expose screen,
-see "What's verified" below for why). Anything not picked there is
-invisible to the mod, even if a player types its exact entity_id in-game.
+**Manually:** copy `custom_components/hacraft` into your Home Assistant `custom_components` folder and restart.
 
-**After updating the integration**, open **Configure** again: domains added
-by a newer release (for example `media_player` in 0.4.6) are never ticked
-automatically, so the mod will list nothing for them until you do. Restart
-Home Assistant after updating the files, and make sure the integration is
-enabled (a disabled entry exposes nothing).
+Then:
 
-## What this integration does
+1. *Settings -> Devices & Services -> Add integration -> HACraft* (a single confirmation step, nothing to fill in).
+2. On the HACraft card press **Configure** and pick what Minecraft may see (see below).
+3. Create a **long-lived access token** (your profile -> *Security*) and give it to the mod's Home Server block;
+   the mod's README has the in-game steps.
 
-Registers three commands on Home Assistant's own `/api/websocket`
-connection (not a second socket - see `docs/PROTOCOL.md`):
-`hacraft/list_entities`, `hacraft/subscribe_entities`,
-`hacraft/call_service`. The mod authenticates to that same
-`/api/websocket` endpoint with a normal long-lived access token, exactly
-like any other Home Assistant client, then issues these on top.
+## Choosing what Minecraft can see
 
-Entity visibility is HACraft's own list, picked via its Options flow (the
-"Configure" button on its integration card) and stored on the config
-entry - see `exposure.py` and `config_flow.py`.
+**Configure** on the HACraft card opens HACraft's own picker (it is *not* the Voice assistants "Expose" screen -
+Home Assistant does not let a custom integration add a tab there). Tick whole groups ("All lights", "All
+cameras", ...) or individual devices. Anything not ticked is invisible and untouchable for the mod, even if a
+player types the exact entity id in-game.
 
-## What's verified vs. not
+| Domain | Used for |
+|---|---|
+| `light`, `switch`, `input_boolean`, `fan` | Light Switch, Controller, Action, screens |
+| `climate` | Thermostat |
+| `cover` | Cover (blinds, garage doors, ...) |
+| `media_player` | Media Player |
+| `vacuum` | Vacuum Dock |
+| `sensor`, `binary_sensor` | Sensor, Sensor Screen (text, graphs) |
+| `script`, `scene`, `button` | Action block |
+| `camera` | pictures on a Sensor Screen |
 
-- **Verified against a real Home Assistant instance**: the config flow
-  (single confirmation step), the integration loading successfully, and
-  the mod connecting over `/api/websocket` with a long-lived access token
-  and getting `auth_ok`.
-- **Corrected after real-world testing**: the original design reused Home
-  Assistant's built-in Settings -> Voice Assistants -> Expose screen (the
-  one behind Assist/Google Assistant/Alexa) for entity visibility, on the
-  assumption that a third-party integration could register itself there as
-  another "assistant" tab. That assumption was wrong - that screen's tabs
-  are hardcoded in Home Assistant's own frontend to
-  `conversation`/`cloud.alexa`/`cloud.google_assistant`; "HACraft" never
-  appeared as an option no matter how the integration was installed or set
-  up. Fixed by giving HACraft its own Options flow entity picker instead
-  (`config_flow.py`'s `HACraftOptionsFlow`, backed by
-  `homeassistant.helpers.selector.EntitySelector` - a long-stable, widely
-  used HA API, unlike the internal `exposed_entities` module this replaces).
-- **Not yet verified**: the `websocket_api.ActiveConnection`/
-  `connection.subscriptions` subscription-cleanup pattern in
-  `websocket_api.py`, and the `Event[EventStateChangedData]` typed-event
-  annotation, haven't specifically been exercised by a long-running
-  `subscribe_entities` session yet (list_entities and call_service have).
-  If live state updates don't reach the mod, `websocket_api.py` is the
-  first place to check.
+> **After updating the integration, open Configure again.** Domains added by a newer release (for example
+> `media_player`, or `camera` in 0.5.0) are never ticked automatically, so the mod lists nothing for them until
+> you do. Restart Home Assistant after updating the files, and make sure the integration is enabled - a
+> disabled entry exposes nothing.
+
+## Compatibility
+
+| Integration | Mod | Notes |
+|---|---|---|
+| 0.5.x | 0.2.x | recorded history for graphs, cameras, scripts, scenes, buttons and fans |
+| 0.4.x | 0.2.x | works; graphs fill up live only and those extra domains are missing |
+
+Needs Home Assistant 2024.1 or newer. Graph history needs the **recorder** integration (on by default).
+
+## What it adds to Home Assistant
+
+Commands on Home Assistant's own `/api/websocket` (details in [docs/PROTOCOL.md](docs/PROTOCOL.md)):
+
+| Command | Purpose |
+|---|---|
+| `hacraft/list_entities` | the exposed entities and their state |
+| `hacraft/subscribe_entities` | push state changes for the entities the mod follows |
+| `hacraft/call_service` | run a service on one exposed entity |
+| `hacraft/get_history` | recorded history of an exposed entity, evenly sampled (fills the mod's graphs) |
+| `hacraft/camera_frame`, `hacraft/camera_removed` | pictures from Minecraft's Home Camera blocks, which appear as `camera.hacraft_<name>` |
+
+Every command checks that the entity is exposed; the integration refuses everything else.
+
+## Troubleshooting
+
+* **The mod lists nothing for a device type** - tick it under *Configure* (see the note above), and check the
+  integration card is enabled.
+* **A graph starts empty** - the recorder must be running, and the integration must be 0.5.0 or newer.
+* **Camera pictures do not show up** - tick the camera (or "All cameras") under *Configure*. The mod fetches
+  pictures through Home Assistant's camera proxy with the player's token.
+* **Home Assistant logs "unknown command: hacraft/..."** - the integration is older than the mod expects;
+  update it and restart.
+
+## Development
+
+`custom_components/hacraft` is the integration; `tests/` holds tests for the pure helpers
+(`python3 tests/test_history.py`). The GitHub workflow runs `hassfest`, HACS validation and these tests on every
+push and weekly. `docs/PROTOCOL.md` is the wire format; the mod repository has a copy that must stay in sync.
 
 ## License
 
-Not yet chosen - see the architecture plan this was built from. Add a
-`LICENSE` file before the first public release (GPL-3.0 is the common
-convention for HACS integrations, if you want a default to start from).
+[MIT](LICENSE)
