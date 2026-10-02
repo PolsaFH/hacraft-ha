@@ -35,4 +35,6 @@ jobs:
       - name: Compile every module
         run: python -m compileall -q custom_components
       - name: History helpers
-        run: python tests/test_history.py
+        run: |
+          python tests/test_history.py
+          python tests/test_summary.py

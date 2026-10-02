@@ -82,10 +82,17 @@ Every command checks that the entity is exposed; the integration refuses everyth
 * **Home Assistant logs "unknown command: hacraft/..."** - the integration is older than the mod expects;
   update it and restart.
 
+## Diagnostics
+
+*Settings -> Devices & Services -> HACraft -> three dots -> Download diagnostics* gives a small file with the
+integration and Home Assistant versions, whether the recorder is running, and how many entities of each domain
+Minecraft can see. It holds counts only - no entity names, addresses or tokens - so it is safe to attach to a
+bug report.
+
 ## Development
 
 `custom_components/hacraft` is the integration; `tests/` holds tests for the pure helpers
-(`python3 tests/test_history.py`). The GitHub workflow runs `hassfest`, HACS validation and these tests on every
+(`python3 tests/test_history.py`, `python3 tests/test_summary.py`). The GitHub workflow runs `hassfest`, HACS validation and these tests on every
 push and weekly. `docs/PROTOCOL.md` is the wire format; the mod repository has a copy that must stay in sync.
 
 ## License

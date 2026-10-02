@@ -1,0 +1,25 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sett opp HACraft",
+        "description": "Dette slår på websocket-kommandoene som HACraft-modden din i Minecraft kobler til. Du trenger ikke fylle ut noe her - lag i stedet et langlevd tilgangstoken i Home Assistant-profilen din (Innstillinger > profilen din > Sikkerhet), og skriv inn adressen til denne instansen og tokenet i Home Server-blokken i modden."
+      }
+    },
+    "abort": {
+      "already_configured": "HACraft er allerede satt opp."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Velg hva Minecraft kan se",
+        "description": "Alt som ikke er valgt her er usynlig for modden, selv om en spiller skriver inn nøyaktig entity_id i spillet. Kryss av for et domene under for å eksponere alle enheter av den typen (også de du legger til senere), eller velg enkeltenheter for finere kontroll.",
+        "data": {
+          "expose_all_domains": "Eksponer alle disse domenene",
+          "exposed_entities": "Eller eksponer enkeltenheter"
+        }
+      }
+    }
+  }
+}

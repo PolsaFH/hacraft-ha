@@ -2,6 +2,9 @@
 
 DOMAIN = "hacraft"
 
+# Every camera Minecraft sends pictures from shows up as camera.hacraft_<camera_id>.
+CAMERA_ENTITY_PREFIX = "camera.hacraft_"
+
 CMD_LIST_ENTITIES = f"{DOMAIN}/list_entities"
 CMD_SUBSCRIBE_ENTITIES = f"{DOMAIN}/subscribe_entities"
 CMD_CALL_SERVICE = f"{DOMAIN}/call_service"
