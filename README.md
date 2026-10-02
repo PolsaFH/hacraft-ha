@@ -53,7 +53,7 @@ player types the exact entity id in-game.
 
 | Integration | Mod | Notes |
 |---|---|---|
-| 0.5.x | 0.2.x | recorded history for graphs, cameras, scripts, scenes, buttons and fans |
+| 0.5.x | 0.2.x, 0.3.x | recorded history for graphs, cameras, scripts, scenes, buttons and fans |
 | 0.4.x | 0.2.x | works; graphs fill up live only and those extra domains are missing |
 
 Needs Home Assistant 2024.1 or newer. Graph history needs the **recorder** integration (on by default).
