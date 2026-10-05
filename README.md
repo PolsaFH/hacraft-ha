@@ -14,6 +14,8 @@ The integration is small on purpose: it adds a few commands to Home Assistant's 
 list - what Minecraft is allowed to see. The mod connects with an ordinary long-lived access token, exactly like
 any other Home Assistant client.
 
+**The Minecraft mod** is on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/hacraft) (it is closed source, free to download and use).
+
 ## Installation
 
 **HACS:** *HACS -> Integrations -> three dots -> Custom repositories*, add `https://github.com/PolsaFH/hacraft-ha`
